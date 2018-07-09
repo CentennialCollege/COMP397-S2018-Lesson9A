@@ -6,10 +6,24 @@
   let stage: createjs.Stage;
   let welcomeLabel: objects.Label;
   let startButton: objects.Button;
+  let AssetManager: createjs.LoadQueue;
+
+  let Manifest = [
+    {id: "StartButton", src:"/Assets/images/StartButton.png"}
+  ]
+
+  function Init():void {
+    console.log(`%c Assets Loading...`, "font-weight:bold; font-size:20px; color: green;")
+    AssetManager = new createjs.LoadQueue();
+    managers.Game.AssetManager = AssetManager;
+    AssetManager.installPlugin(createjs.Sound); // enables preloading of sound assets
+    AssetManager.on("complete", Start);
+    AssetManager.loadManifest(Manifest);
+  }
 
   function Start(): void {
     console.log(
-      `%c Start Function`,
+      `%c App Starting...`,
       "font-weight:bold; font-size:20px; color: red;"
     );
     canvas = document.getElementsByTagName("canvas")[0];
@@ -46,7 +60,7 @@
     );
     stage.addChild(welcomeLabel);
 
-    startButton = new objects.Button("../../Assets/images/StartButton.png", 320, 300, true);
+    startButton = new objects.Button("StartButton", 320, 300, true);
     stage.addChild(startButton);
 
     startButton.on("click", function(){
@@ -54,5 +68,5 @@
     });
 }
 
-  window.addEventListener("load", Start);
+  window.addEventListener("load", Init);
 })();
