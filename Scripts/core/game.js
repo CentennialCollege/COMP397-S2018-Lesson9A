@@ -4,11 +4,13 @@
     // Game Variables
     var canvas;
     var stage;
-    var welcomeLabel;
-    var startButton;
     var AssetManager;
+    var currentScene;
+    var currentState;
     var Manifest = [
-        { id: "StartButton", src: "/Assets/images/StartButton.png" }
+        { id: "StartButton", src: "/Assets/images/StartButton.png" },
+        { id: "NextButton", src: "/Assets/images/NextButton.png" },
+        { id: "BackButton", src: "/Assets/images/BackButton.png" }
     ];
     function Init() {
         console.log("%c Assets Loading...", "font-weight:bold; font-size:20px; color: green;");
@@ -25,23 +27,32 @@
         stage.enableMouseOver(20); // enables mouseover events
         createjs.Ticker.framerate = 60; // sets framerate to 60fps
         createjs.Ticker.on("tick", Update);
+        currentState = config.Scene.START;
         // This is where all the magic happens
         Main();
     }
     // game loop
     function Update() {
-        //helloLabel.rotation += 5;
+        if (managers.Game.CurrentState != currentState) {
+            currentState = managers.Game.CurrentState;
+            Main();
+        }
+        currentScene.Update();
         stage.update();
     }
     function Main() {
-        console.log("%c Main Function", "font-style:italic; font-size:16px; color:blue;");
-        welcomeLabel = new objects.Label("Welcome", "60px", "Consolas", "#000000", 320, 200, true);
-        stage.addChild(welcomeLabel);
-        startButton = new objects.Button("StartButton", 320, 300, true);
-        stage.addChild(startButton);
-        startButton.on("click", function () {
-            welcomeLabel.text = "Clicked!";
-        });
+        console.log("%c Finite State Machine", "font-style:italic; font-size:16px; color:blue;");
+        switch (currentState) {
+            case config.Scene.START:
+                currentScene = new Scenes.Start();
+                break;
+            case config.Scene.PLAY:
+                currentScene = new Scenes.Play();
+                break;
+            case config.Scene.END:
+                break;
+        }
+        stage.addChild(currentScene);
     }
     window.addEventListener("load", Init);
 })();

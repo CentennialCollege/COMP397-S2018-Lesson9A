@@ -4,12 +4,16 @@
   // Game Variables
   let canvas: HTMLCanvasElement;
   let stage: createjs.Stage;
-  let welcomeLabel: objects.Label;
-  let startButton: objects.Button;
+
   let AssetManager: createjs.LoadQueue;
 
+  let currentScene: objects.Scene;
+  let currentState: config.Scene;
+
   let Manifest = [
-    {id: "StartButton", src:"/Assets/images/StartButton.png"}
+    {id: "StartButton", src:"/Assets/images/StartButton.png"},
+    {id: "NextButton", src:"/Assets/images/NextButton.png"},
+    {id: "BackButton", src:"/Assets/images/BackButton.png"}
   ]
 
   function Init():void {
@@ -32,40 +36,44 @@
     createjs.Ticker.framerate = 60; // sets framerate to 60fps
     createjs.Ticker.on("tick", Update);
 
+    currentState = config.Scene.START;
+
     // This is where all the magic happens
     Main();
   }
 
   // game loop
   function Update(): void {
-    //helloLabel.rotation += 5;
+    if(managers.Game.CurrentState != currentState) {
+      currentState = managers.Game.CurrentState;
+      Main();
+    }
+    currentScene.Update();
 
     stage.update();
   }
 
   function Main(): void {
     console.log(
-      `%c Main Function`,
+      `%c Finite State Machine`,
       "font-style:italic; font-size:16px; color:blue;"
     );
 
-    welcomeLabel = new objects.Label(
-      "Welcome",
-      "60px",
-      "Consolas",
-      "#000000",
-      320,
-      200,
-      true
-    );
-    stage.addChild(welcomeLabel);
+    switch(currentState) {
+      case config.Scene.START:
+        currentScene = new Scenes.Start();
+        
+      break;
 
-    startButton = new objects.Button("StartButton", 320, 300, true);
-    stage.addChild(startButton);
+      case config.Scene.PLAY:
+        currentScene = new Scenes.Play();
+      break;
 
-    startButton.on("click", function(){
-        welcomeLabel.text = "Clicked!";
-    });
+      case config.Scene.END:
+      break;
+    }
+
+    stage.addChild(currentScene);
 }
 
   window.addEventListener("load", Init);
